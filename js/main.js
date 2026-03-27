@@ -8,23 +8,25 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  const toggleButtons = document.querySelectorAll(".toggle-bar__btn");
-  const togglePanels = document.querySelectorAll(".toggle-panel");
+  const toggleBars = document.querySelectorAll(".toggle-bar");
+  toggleBars.forEach((toggleBar) => {
+    const buttonGroup = toggleBar.querySelectorAll(".toggle-bar__btn");
+    const sectionContainer = toggleBar.closest(".section, .container, body");
+    const panelGroup = sectionContainer?.querySelectorAll(".toggle-panel");
 
-  if (!toggleButtons.length || !togglePanels.length) {
-    return;
-  }
+    if (!buttonGroup.length || !panelGroup?.length) return;
 
-  toggleButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const targetId = button.getAttribute("data-target");
-      if (!targetId) return;
+    buttonGroup.forEach((button) => {
+      button.addEventListener("click", () => {
+        const targetId = button.getAttribute("data-target");
+        if (!targetId) return;
 
-      toggleButtons.forEach((btn) => btn.classList.remove("toggle-bar__btn--active"));
-      button.classList.add("toggle-bar__btn--active");
+        buttonGroup.forEach((btn) => btn.classList.remove("toggle-bar__btn--active"));
+        button.classList.add("toggle-bar__btn--active");
 
-      togglePanels.forEach((panel) => {
-        panel.classList.toggle("active", panel.id === targetId);
+        panelGroup.forEach((panel) => {
+          panel.classList.toggle("active", panel.id === targetId);
+        });
       });
     });
   });
@@ -42,13 +44,13 @@ document.addEventListener("DOMContentLoaded", () => {
       .map(
         (org) => `
           <article class="org-card">
-            <div class="org-card__left">
+            <a class="org-card__left org-card__link" href="org.html?org=${encodeURIComponent(org.name)}">
               <div class="org-card__logo" aria-hidden="true">GSU</div>
               <h3 class="org-card__name" title="${org.name}">${org.name}</h3>
-            </div>
-            <button class="org-card__btn" type="button" disabled>
+            </a>
+            <a class="org-card__btn org-card__btn--link" href="org.html?org=${encodeURIComponent(org.name)}">
               View
-            </button>
+            </a>
           </article>
         `
       )

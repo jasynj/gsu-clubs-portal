@@ -481,11 +481,327 @@
     opacity: 0.8;
   }
 
+  .org-card__link {
+    flex: 1;
+  }
+
+  .org-card__btn--link {
+    cursor: pointer;
+    opacity: 1;
+    transition: background var(--transition), color var(--transition), border-color var(--transition);
+  }
+
+  .org-card__btn--link:hover {
+    background: var(--color-black);
+    color: var(--color-gold);
+    border-color: var(--color-black);
+  }
+
   .org-grid__status {
     font-size: 0.95rem;
     color: var(--color-gray-text);
     text-align: center;
     padding: 24px 0;
+  }
+
+  /* ===== ORG DETAILS PAGE ===== */
+  .org-page {
+    margin-top: 64px;
+  }
+
+  .org-page__back {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: var(--color-gray-text);
+    font-weight: 600;
+  }
+
+  .org-page__hero {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .org-page__logo {
+    width: 52px;
+    height: 52px;
+    font-size: 0.9rem;
+    border-radius: 10px;
+  }
+
+  .org-page__type {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: var(--color-gray-text);
+    letter-spacing: 0.6px;
+    margin-bottom: 2px;
+  }
+
+  .org-page__title {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    line-height: 1.25;
+  }
+
+  .doc-section {
+    margin-bottom: 28px;
+  }
+
+  .doc-section__heading {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    margin-bottom: 12px;
+  }
+
+  .doc-section__list {
+    display: grid;
+    gap: 12px;
+  }
+
+  .doc-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--card-radius);
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .doc-card__summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 14px 16px;
+  }
+
+  .doc-card__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .doc-card__summary::after {
+    content: "+";
+    float: right;
+    color: var(--color-gray-text);
+    font-size: 1.2rem;
+    line-height: 1;
+    margin-top: -46px;
+  }
+
+  .doc-card[open] .doc-card__summary::after {
+    content: "-";
+  }
+
+  .doc-card__type {
+    font-size: 0.78rem;
+    color: var(--color-gray-text);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+
+  .doc-card__title {
+    font-size: 1rem;
+    margin-bottom: 4px;
+  }
+
+  .doc-card__date {
+    font-size: 0.8rem;
+    color: var(--color-gray-text);
+  }
+
+  .doc-card__body {
+    border-top: 1px solid var(--color-border);
+    padding: 14px 16px;
+    font-size: 0.95rem;
+    color: #2b2b2b;
+  }
+
+  .doc-card__file-link {
+    display: inline-block;
+    margin-top: 12px;
+    color: #0d4db0;
+    text-decoration: underline;
+  }
+
+  .org-page__actions {
+    margin-top: 14px;
+    margin-bottom: 20px;
+  }
+
+  .org-page__edit-btn {
+    border: none;
+    border-radius: 8px;
+    background: var(--color-black);
+    color: var(--color-gold);
+    padding: 10px 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .org-page__edit-btn:disabled {
+    opacity: 0.65;
+    cursor: default;
+  }
+
+  .doc-editor {
+    border: 1px solid var(--color-border);
+    border-radius: var(--card-radius);
+    background: #fff;
+    padding: 18px;
+    margin-top: 12px;
+  }
+
+  .doc-editor__title {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+  }
+
+  .doc-editor__hint {
+    color: var(--color-gray-text);
+    margin-bottom: 14px;
+    font-size: 0.9rem;
+  }
+
+  .doc-editor__form {
+    display: grid;
+    gap: 12px;
+  }
+
+  .doc-editor__field {
+    display: grid;
+    gap: 6px;
+    font-size: 0.9rem;
+  }
+
+  .doc-editor__field input,
+  .doc-editor__field textarea,
+  .doc-editor__field select {
+    border: 1px solid #cfd3da;
+    border-radius: 8px;
+    padding: 10px;
+    font: inherit;
+    width: 100%;
+  }
+
+  .doc-editor__buttons {
+    display: flex;
+    gap: 10px;
+  }
+
+  .doc-editor__save,
+  .doc-editor__reset {
+    border: none;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .doc-editor__save {
+    background: var(--color-black);
+    color: var(--color-gold);
+  }
+
+  .doc-editor__reset {
+    background: #eceff3;
+    color: #2d3651;
+  }
+
+  .doc-card__admin-actions {
+    margin-top: 14px;
+    display: flex;
+    gap: 10px;
+  }
+
+  .doc-card__admin-btn {
+    border: 1px solid #bdc3d0;
+    background: #fff;
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .doc-card__admin-btn--danger {
+    color: #a32121;
+    border-color: #debcbc;
+    background: #fff7f7;
+  }
+
+  .admin-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+  }
+
+  .admin-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+  }
+
+  .admin-modal__card {
+    position: relative;
+    z-index: 1;
+    max-width: 420px;
+    margin: 12vh auto 0;
+    background: #fff;
+    border-radius: 10px;
+    padding: 18px;
+  }
+
+  .admin-modal__card h2 {
+    font-family: var(--font-heading);
+    margin-bottom: 6px;
+  }
+
+  .admin-modal__card p {
+    color: var(--color-gray-text);
+    margin-bottom: 12px;
+  }
+
+  .admin-modal__field {
+    display: grid;
+    gap: 6px;
+  }
+
+  .admin-modal__field input {
+    border: 1px solid #cfd3da;
+    border-radius: 8px;
+    padding: 10px;
+    font: inherit;
+    width: 100%;
+  }
+
+  .admin-modal__error {
+    min-height: 20px;
+    color: #a32121;
+    font-size: 0.88rem;
+    margin: 8px 0;
+  }
+
+  .admin-modal__buttons {
+    display: flex;
+    gap: 10px;
+  }
+
+  .admin-modal__submit,
+  .admin-modal__cancel {
+    border: none;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .admin-modal__submit {
+    background: var(--color-black);
+    color: var(--color-gold);
+  }
+
+  .admin-modal__cancel {
+    background: #eceff3;
+    color: #2d3651;
   }
   
   /* ===== FOOTER ===== */
@@ -609,6 +925,11 @@
   
     .step-card {
       flex: 1 1 100%;
+    }
+
+    .doc-editor__buttons,
+    .admin-modal__buttons {
+      flex-direction: column;
     }
   
   }

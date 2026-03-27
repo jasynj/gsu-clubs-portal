@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Organization Documents | Grambling State University</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="header__inner">
+        <a href="index.html" class="header__logo">
+          <span class="header__logo-text">GRAMBLING STATE</span>
+          <span class="header__logo-sub">Clubs & Organizations</span>
+        </a>
+      </div>
+    </header>
+
+    <main class="org-page">
+      <section class="section">
+        <div class="container">
+          <a class="org-page__back" href="index.html#organizations">← Back to all organizations</a>
+
+          <div class="org-page__hero">
+            <div class="org-card__logo org-page__logo">GSU</div>
+            <div>
+              <p class="org-page__type" id="orgTypeLabel"></p>
+              <h1 class="org-page__title" id="orgTitle">Loading organization...</h1>
+            </div>
+          </div>
+
+          <div id="docSections"></div>
+
+          <div class="org-page__actions">
+            <button class="org-page__edit-btn" id="openAdminModal" type="button">Edit Documents</button>
+          </div>
+
+          <section class="doc-editor" id="docEditor" hidden>
+            <h2 class="doc-editor__title">Admin Editor</h2>
+            <p class="doc-editor__hint">
+              Add new constitution/bylaw entries or update an existing one.
+            </p>
+            <form id="docForm" class="doc-editor__form">
+              <input type="hidden" id="docId" />
+
+              <label class="doc-editor__field">
+                <span>Document Type</span>
+                <select id="docType" required>
+                  <option value="constitution">Constitution</option>
+                  <option value="bylaws">Bylaws</option>
+                </select>
+              </label>
+
+              <label class="doc-editor__field">
+                <span>Title</span>
+                <input id="docTitleInput" type="text" required maxlength="160" />
+              </label>
+
+              <label class="doc-editor__field">
+                <span>Document Content</span>
+                <textarea
+                  id="docContentInput"
+                  rows="7"
+                  placeholder="Paste the constitution/bylaw text or summary..."
+                  required
+                ></textarea>
+              </label>
+
+              <label class="doc-editor__field">
+                <span>Optional File Upload (PDF, DOCX, etc.)</span>
+                <input id="docFileInput" type="file" />
+              </label>
+
+              <div class="doc-editor__buttons">
+                <button type="submit" class="doc-editor__save">Save Document</button>
+                <button type="button" id="docFormReset" class="doc-editor__reset">Clear</button>
+              </div>
+            </form>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <div class="admin-modal" id="adminModal" hidden>
+      <div class="admin-modal__backdrop" data-close-modal="true"></div>
+      <div class="admin-modal__card" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle">
+        <h2 id="adminModalTitle">Organization Admin Access</h2>
+        <p>Enter the organization password to unlock editing.</p>
+        <form id="adminPasswordForm">
+          <label class="admin-modal__field">
+            <span>Password</span>
+            <input id="adminPasswordInput" type="password" required autocomplete="off" />
+          </label>
+          <p class="admin-modal__error" id="adminError" aria-live="polite"></p>
+          <div class="admin-modal__buttons">
+            <button type="submit" class="admin-modal__submit">Unlock</button>
+            <button type="button" class="admin-modal__cancel" data-close-modal="true">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="js/org-details.js"></script>
+  </body>
+</html>
