@@ -1,3 +1,5 @@
+const API_BASE = "http://localhost:3001";
+
 document.addEventListener("DOMContentLoaded", () => {
   const orgTitle = document.getElementById("orgTitle");
   const orgTypeLabel = document.getElementById("orgTypeLabel");
@@ -17,17 +19,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const adminError = document.getElementById("adminError");
 
   const params = new URLSearchParams(window.location.search);
-  const orgNameParam = params.get("org");
-
-  const MAX_FILE_SIZE_BYTES = 1.5 * 1024 * 1024;
-  const STORAGE_PREFIX = "gsu-org-docs-v1";
+  const orgSlugParam = params.get("slug");
 
   let currentOrg = null;
+  let token = null;
   let isUnlocked = false;
-  let docsState = {
-    constitution: [],
-    bylaws: [],
-  };
+  let docsState = { constitution: [], bylaws: [] };
 
   const escapeHtml = (value = "") =>
     value
@@ -44,71 +41,22 @@ document.addEventListener("DOMContentLoaded", () => {
     return date.toLocaleString();
   };
 
-  const slugify = (value) =>
-    value
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-
-  const getStorageKey = () => `${STORAGE_PREFIX}:${slugify(currentOrg.name)}`;
-
-  const defaultDocsForOrg = (orgName) => ({
-    constitution: [
-      {
-        id: crypto.randomUUID(),
-        title: "Constitution Document",
-        content: `Constitution placeholder for ${orgName}.`,
-        updatedAt: new Date().toISOString(),
+  const authFetch = (url, options = {}) =>
+    fetch(url, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(options.headers || {}),
       },
-    ],
-    bylaws: [
-      {
-        id: crypto.randomUUID(),
-        title: "Bylaws Document",
-        content: `Bylaws placeholder for ${orgName}.`,
-        updatedAt: new Date().toISOString(),
-      },
-    ],
-  });
-
-  const saveDocs = () => {
-    if (!currentOrg) return;
-    localStorage.setItem(getStorageKey(), JSON.stringify(docsState));
-  };
-
-  const loadDocs = () => {
-    if (!currentOrg) return;
-    const stored = localStorage.getItem(getStorageKey());
-    if (!stored) {
-      docsState = defaultDocsForOrg(currentOrg.name);
-      saveDocs();
-      return;
-    }
-
-    try {
-      const parsed = JSON.parse(stored);
-      docsState = {
-        constitution: Array.isArray(parsed.constitution) ? parsed.constitution : [],
-        bylaws: Array.isArray(parsed.bylaws) ? parsed.bylaws : [],
-      };
-
-      if (!docsState.constitution.length && !docsState.bylaws.length) {
-        docsState = defaultDocsForOrg(currentOrg.name);
-        saveDocs();
-      }
-    } catch (error) {
-      docsState = defaultDocsForOrg(currentOrg.name);
-      saveDocs();
-    }
-  };
+    });
 
   const makeDocumentCardMarkup = (doc, typeLabel) => {
     const safeTitle = escapeHtml(doc.title || "Untitled document");
     const safeContent = escapeHtml(doc.content || "");
-    const fileMarkup =
-      doc.fileData && doc.fileName
-        ? `<a class="doc-card__file-link" href="${doc.fileData}" download="${escapeHtml(doc.fileName)}">Download attached file: ${escapeHtml(doc.fileName)}</a>`
-        : "";
+    const fileMarkup = doc.fileUrl
+      ? `<a class="doc-card__file-link" href="${escapeHtml(doc.fileUrl)}" target="_blank" rel="noopener">View attached file</a>`
+      : "";
 
     return `
       <details class="doc-card">
@@ -125,8 +73,8 @@ document.addEventListener("DOMContentLoaded", () => {
           ${
             isUnlocked
               ? `<div class="doc-card__admin-actions">
-                  <button type="button" class="doc-card__admin-btn" data-edit-doc-id="${doc.id}" data-edit-doc-type="${typeLabel.toLowerCase()}">Edit</button>
-                  <button type="button" class="doc-card__admin-btn doc-card__admin-btn--danger" data-delete-doc-id="${doc.id}" data-delete-doc-type="${typeLabel.toLowerCase()}">Delete</button>
+                  <button type="button" class="doc-card__admin-btn" data-edit-doc-id="${doc.id}" data-edit-doc-type="${doc.docType}">Edit</button>
+                  <button type="button" class="doc-card__admin-btn doc-card__admin-btn--danger" data-delete-doc-id="${doc.id}">Delete</button>
                 </div>`
               : ""
           }
@@ -139,7 +87,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const constitutionCards = docsState.constitution
       .map((doc) => makeDocumentCardMarkup(doc, "Constitution"))
       .join("");
-    const bylawsCards = docsState.bylaws.map((doc) => makeDocumentCardMarkup(doc, "Bylaws")).join("");
+    const bylawsCards = docsState.bylaws
+      .map((doc) => makeDocumentCardMarkup(doc, "Bylaws"))
+      .join("");
 
     docSections.innerHTML = `
       <section class="doc-section">
@@ -162,7 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
     docTypeInput.value = "constitution";
     docTitleInput.value = "";
     docContentInput.value = "";
-    docFileInput.value = "";
+    if (docFileInput) docFileInput.value = "";
   };
 
   const openModal = () => {
@@ -185,28 +135,8 @@ document.addEventListener("DOMContentLoaded", () => {
     renderDocuments();
   };
 
-  const getFileData = async (file) => {
-    if (!file) return null;
-    if (file.size > MAX_FILE_SIZE_BYTES) {
-      throw new Error("File is too large. Please upload a file under 1.5MB.");
-    }
-
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        resolve({
-          fileName: file.name,
-          fileData: reader.result,
-          mimeType: file.type || "application/octet-stream",
-        });
-      };
-      reader.onerror = () => reject(new Error("Could not read uploaded file."));
-      reader.readAsDataURL(file);
-    });
-  };
-
   const bootstrapPage = async () => {
-    if (!orgNameParam) {
+    if (!orgSlugParam) {
       orgTitle.textContent = "Organization not found";
       orgTypeLabel.textContent = "Missing organization parameter";
       docSections.innerHTML = '<p class="org-grid__status">Please return and select an organization.</p>';
@@ -215,26 +145,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      const response = await fetch("org_passwords.json");
-      if (!response.ok) throw new Error("Could not load organizations");
+      const response = await fetch(`${API_BASE}/api/orgs/${orgSlugParam}`);
+      if (!response.ok) throw new Error("Not found");
 
-      const data = await response.json();
-      const orgList = Array.isArray(data?.passwords) ? data.passwords : [];
+      const org = await response.json();
+      currentOrg = org;
 
-      currentOrg = orgList.find((org) => org.name === orgNameParam);
-      if (!currentOrg) {
-        orgTitle.textContent = "Organization not found";
-        orgTypeLabel.textContent = "Not registered";
-        docSections.innerHTML = '<p class="org-grid__status">The selected organization is not in the current list.</p>';
-        openAdminModalBtn.disabled = true;
-        return;
-      }
+      orgTitle.textContent = org.name;
+      orgTypeLabel.textContent = org.type === "greek" ? "Greek Organization" : "Club / Organization";
 
-      orgTitle.textContent = currentOrg.name;
-      orgTypeLabel.textContent = currentOrg.type === "greek" ? "Greek Organization" : "Club / Organization";
-      loadDocs();
+      docsState = {
+        constitution: org.documents.filter((d) => d.docType === "constitution"),
+        bylaws: org.documents.filter((d) => d.docType === "bylaws"),
+      };
+
       renderDocuments();
-    } catch (error) {
+    } catch {
       orgTitle.textContent = "Organization not available";
       orgTypeLabel.textContent = "Load error";
       docSections.innerHTML = '<p class="org-grid__status">Could not load organization data.</p>';
@@ -245,22 +171,39 @@ document.addEventListener("DOMContentLoaded", () => {
   openAdminModalBtn.addEventListener("click", openModal);
 
   adminModal.addEventListener("click", (event) => {
-    const closeTarget = event.target.closest("[data-close-modal='true']");
-    if (closeTarget) {
-      closeModal();
-    }
+    if (event.target.closest("[data-close-modal='true']")) closeModal();
   });
 
-  adminPasswordForm.addEventListener("submit", (event) => {
+  adminPasswordForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!currentOrg) return;
 
-    const enteredPassword = adminPasswordInput.value.trim();
-    if (enteredPassword !== currentOrg.password) {
-      adminError.textContent = "Incorrect password for this organization.";
+    const password = adminPasswordInput.value.trim();
+    adminError.textContent = "";
+
+    // Try org login first, then admin login
+    let res = await fetch(`${API_BASE}/api/auth/org-login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slug: currentOrg.slug, password }),
+    });
+
+    if (res.status === 401) {
+      res = await fetch(`${API_BASE}/api/auth/admin-login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+    }
+
+    if (!res.ok) {
+      adminError.textContent = "Incorrect password.";
+      adminPasswordInput.value = "";
       return;
     }
 
+    const data = await res.json();
+    token = data.token;
     closeModal();
     unlockEditing();
   });
@@ -279,33 +222,35 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!docTitle || !docContent || !["constitution", "bylaws"].includes(docType)) return;
 
     try {
-      const uploadedFile = await getFileData(docFileInput.files?.[0]);
-      const timestamp = new Date().toISOString();
-      const typeCollection = docsState[docType];
+      let res;
 
       if (docId) {
-        const existing = typeCollection.find((doc) => doc.id === docId);
-        if (!existing) return;
-
-        existing.title = docTitle;
-        existing.content = docContent;
-        existing.updatedAt = timestamp;
-        if (uploadedFile) {
-          existing.fileName = uploadedFile.fileName;
-          existing.fileData = uploadedFile.fileData;
-          existing.mimeType = uploadedFile.mimeType;
-        }
+        res = await authFetch(`${API_BASE}/api/documents/${docId}`, {
+          method: "PATCH",
+          body: JSON.stringify({ title: docTitle, content: docContent }),
+        });
       } else {
-        typeCollection.unshift({
-          id: crypto.randomUUID(),
-          title: docTitle,
-          content: docContent,
-          updatedAt: timestamp,
-          ...(uploadedFile || {}),
+        res = await authFetch(`${API_BASE}/api/orgs/${currentOrg.slug}/documents`, {
+          method: "POST",
+          body: JSON.stringify({ docType, title: docTitle, content: docContent }),
         });
       }
 
-      saveDocs();
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to save document");
+      }
+
+      const saved = await res.json();
+
+      if (docId) {
+        const list = docsState[saved.docType];
+        const idx = list.findIndex((d) => d.id === saved.id);
+        if (idx !== -1) list[idx] = saved;
+      } else {
+        docsState[saved.docType].unshift(saved);
+      }
+
       renderDocuments();
       resetForm();
     } catch (error) {
@@ -313,16 +258,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  docSections.addEventListener("click", (event) => {
+  docSections.addEventListener("click", async (event) => {
     if (!isUnlocked) return;
 
     const editBtn = event.target.closest("[data-edit-doc-id]");
     if (editBtn) {
       const docId = editBtn.getAttribute("data-edit-doc-id");
       const docType = editBtn.getAttribute("data-edit-doc-type");
-      if (!docId || !docType || !["constitution", "bylaws"].includes(docType)) return;
-
-      const targetDoc = docsState[docType].find((doc) => doc.id === docId);
+      const targetDoc = docsState[docType]?.find((doc) => doc.id === docId);
       if (!targetDoc) return;
 
       docIdInput.value = targetDoc.id;
@@ -337,11 +280,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!deleteBtn) return;
 
     const docId = deleteBtn.getAttribute("data-delete-doc-id");
-    const docType = deleteBtn.getAttribute("data-delete-doc-type");
-    if (!docId || !docType || !["constitution", "bylaws"].includes(docType)) return;
+    if (!confirm("Delete this document?")) return;
 
-    docsState[docType] = docsState[docType].filter((doc) => doc.id !== docId);
-    saveDocs();
+    const res = await authFetch(`${API_BASE}/api/documents/${docId}`, { method: "DELETE" });
+    if (!res.ok) {
+      window.alert("Failed to delete document.");
+      return;
+    }
+
+    docsState.constitution = docsState.constitution.filter((d) => d.id !== docId);
+    docsState.bylaws = docsState.bylaws.filter((d) => d.id !== docId);
     renderDocuments();
   });
 
