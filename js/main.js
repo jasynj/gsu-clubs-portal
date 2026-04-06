@@ -1,4 +1,6 @@
-const API_BASE = "http://localhost:3001";
+const API_BASE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+  ? "http://localhost:3001"
+  : "https://gsu-clubs-portal-h8da.vercel.app";
 
 document.addEventListener("DOMContentLoaded", () => {
   const menuBtn = document.getElementById("menuBtn");

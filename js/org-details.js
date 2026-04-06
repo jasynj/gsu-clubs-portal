@@ -1,4 +1,6 @@
-const API_BASE = "http://localhost:3001";
+const API_BASE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+  ? "http://localhost:3001"
+  : "https://gsu-clubs-portal-h8da.vercel.app";
 
 document.addEventListener("DOMContentLoaded", () => {
   const orgTitle = document.getElementById("orgTitle");
@@ -56,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const safeContent = escapeHtml(doc.content || "");
     const fileMarkup = doc.fileUrl
       ? `<a class="doc-card__file-link" href="${escapeHtml(doc.fileUrl)}" target="_blank" rel="noopener">View attached file</a>`
-      : "";
+      : "https://gsu-clubs-portal-h8da.vercel.app";
 
     return `
       <details class="doc-card">
