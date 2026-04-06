@@ -210,6 +210,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
   docFormReset.addEventListener("click", resetForm);
 
+  const uploadFile = async (file) => {
+    if (!file) return null;
+    const ALLOWED = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+    if (!ALLOWED.includes(file.type)) throw new Error("Only PDF or Word documents are allowed.");
+    if (file.size > 10 * 1024 * 1024) throw new Error("File must be under 10MB.");
+
+    const presignRes = await authFetch(`${API_BASE}/api/uploads/presign`, {
+      method: "POST",
+      body: JSON.stringify({ contentType: file.type, orgSlug: currentOrg.slug }),
+    });
+    if (!presignRes.ok) throw new Error("Could not get upload URL.");
+
+    const { uploadUrl, fileUrl } = await presignRes.json();
+
+    const uploadRes = await fetch(uploadUrl, {
+      method: "PUT",
+      headers: { "Content-Type": file.type },
+      body: file,
+    });
+    if (!uploadRes.ok) throw new Error("File upload failed.");
+
+    return fileUrl;
+  };
+
   docForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!currentOrg || !isUnlocked) return;
@@ -222,17 +246,20 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!docTitle || !docContent || !["constitution", "bylaws"].includes(docType)) return;
 
     try {
+      const file = docFileInput?.files?.[0] || null;
+      const fileUrl = file ? await uploadFile(file) : undefined;
+
       let res;
 
       if (docId) {
         res = await authFetch(`${API_BASE}/api/documents/${docId}`, {
           method: "PATCH",
-          body: JSON.stringify({ title: docTitle, content: docContent }),
+          body: JSON.stringify({ title: docTitle, content: docContent, ...(fileUrl !== undefined && { fileUrl }) }),
         });
       } else {
         res = await authFetch(`${API_BASE}/api/orgs/${currentOrg.slug}/documents`, {
           method: "POST",
-          body: JSON.stringify({ docType, title: docTitle, content: docContent }),
+          body: JSON.stringify({ docType, title: docTitle, content: docContent, fileUrl: fileUrl || null }),
         });
       }
 
