@@ -4,7 +4,16 @@ A full-stack organization directory for Grambling State University. Students can
 
 **Live site:** [gsu-clubs-portal.vercel.app](https://gsu-clubs-portal.vercel.app)
 
----
+
+## Built By
+
+Chimdinma Jason — solo, designed and built end-to-end as Student Software Engineer for the GSU Campus Activities & Student Engagement Department.
+
+## User Roles
+
+- **Public visitors** — browse the directory, view org details
+- **Org presidents** — manage their org's profile, upload constitution and bylaws
+- **Admins** — full department oversight, role management
 
 ## Features
 
