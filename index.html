@@ -16,7 +16,11 @@
     <!-- Header -->
     <header class="header" id="header">
       <div class="header__inner">
-        <a href="/" class="header__logo">
+        <a href="https://www.gram.edu/student-life/clubs/" class="header__back">
+          <span class="header__back-arrow" aria-hidden="true">&larr;</span>
+          <span>Back</span>
+        </a>
+        <a href="index.html" class="header__logo">
           <span class="header__logo-text">GRAMBLING STATE</span>
           <span class="header__logo-sub">Clubs & Organizations</span>
         </a>
@@ -24,9 +28,9 @@
           <span></span><span></span><span></span>
         </button>
         <nav class="header__nav" id="mainNav">
-          <a href="#mission" class="header__link">About SEAL</a>
-          <a href="#requirements" class="header__link">Status Requirements</a>
-          <a href="#how-to-start" class="header__link">Start an Organization</a>
+          <a href="about-seal.html" class="header__link">About SEAL</a>
+          <a href="requirements.html" class="header__link">Status Requirements</a>
+          <a href="start-org.html" class="header__link">Start an Organization</a>
         </nav>
       </div>
     </header>
@@ -42,45 +46,52 @@
       </div>
     </section>
 
-    <!-- Mission -->
-    <section class="section" id="mission">
+    <!-- Portal Tiles -->
+    <section class="section" id="portal-tiles">
       <div class="container">
-        <h2 class="section__heading">Office Mission</h2>
-        <div class="mission-content">
-          <p>
-            The Office of Student Engagement and Leadership (SEAL) is the
-            coordinating unit for all organizations at Grambling State
-            University. The office is located in Favrot Student Union, Office
-            #218, and can be reached at (318) 274-3334.
-          </p>
-          <p>
-            SEAL encourages students to get involved through organizations to
-            learn civic responsibility, activism, and how to make a difference
-            in the lives of others.
-          </p>
+        <h2 class="section__heading">Explore the Portal</h2>
+        <p class="section__subtext">
+          Choose a destination to learn more or take action.
+        </p>
+        <div class="portal-tiles">
+          <a href="about-seal.html" class="portal-tile">
+            <div class="portal-tile__circle">
+              <svg class="portal-tile__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="16" x2="12" y2="12" />
+                <line x1="12" y1="8" x2="12.01" y2="8" />
+              </svg>
+            </div>
+            <span class="portal-tile__label">About SEAL</span>
+            <span class="portal-tile__sublabel">Office mission &amp; student org overview</span>
+          </a>
+
+          <a href="requirements.html" class="portal-tile">
+            <div class="portal-tile__circle">
+              <svg class="portal-tile__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M9 11l3 3 8-8" />
+                <path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9" />
+              </svg>
+            </div>
+            <span class="portal-tile__label">Status Requirements</span>
+            <span class="portal-tile__sublabel">What it takes to stay recognized</span>
+          </a>
+
+          <a href="start-org.html" class="portal-tile">
+            <div class="portal-tile__circle">
+              <svg class="portal-tile__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </div>
+            <span class="portal-tile__label">Start an Organization</span>
+            <span class="portal-tile__sublabel">Steps, requirements &amp; new application</span>
+          </a>
         </div>
       </div>
     </section>
 
-    <!-- What Is a Student Organization -->
-    <section class="section" id="student-organization">
-      <div class="container">
-        <h2 class="section__heading">What Is a Student Organization?</h2>
-        <div class="mission-content">
-          <p>
-            A student organization is a group of currently enrolled GSU students
-            who unite to promote a common interest.
-          </p>
-          <p>
-            Only currently enrolled undergraduate students may serve as officers
-            or vote on organizational matters. Recognition as a GSU student
-            organization is not an endorsement by GSU of an organization's
-            purpose or activities.
-          </p>
-        </div>
-      </div>
-    </section>
-
+    <!-- Organizations Directory -->
     <section class="section section--alt" id="organizations">
       <div class="container">
         <h2 class="section__heading">All Clubs, Organizations, and Greeks</h2>
@@ -112,285 +123,6 @@
             <div class="org-grid" data-org-grid="club"></div>
           </div>
         </div>
-      </div>
-    </section>
-
-    <!-- Requirements -->
-    <section class="section section--alt" id="requirements">
-      <div class="container">
-        <h2 class="section__heading">Requirements to Maintain Status</h2>
-        <p class="section__subtext">
-          Use the tabs to view requirements for Clubs &amp; Organizations or
-          NPHC Greeks.
-        </p>
-
-        <div class="toggle-bar">
-          <button
-            class="toggle-bar__btn toggle-bar__btn--active"
-            data-target="req-greeks"
-          >
-            Greeks
-          </button>
-          <button class="toggle-bar__btn" data-target="req-clubs">
-            Clubs &amp; Orgs
-          </button>
-        </div>
-
-        <div class="toggle-content">
-          <!-- Greeks Requirements -->
-          <div class="toggle-panel active" id="req-greeks">
-            <div class="requirements-card">
-              <h3>NPHC Greek Requirements</h3>
-              <ul class="req-list">
-                <li>
-                  Must meet all Clubs &amp; Organizations requirements listed in
-                  the other tab.
-                </li>
-                <li>
-                  Must have 30 completed non-remedial credit hours at GSU and be
-                  classified as sophomore or above.
-                </li>
-                <li>
-                  Must have at least a 2.5 cumulative GPA to apply for
-                  membership.
-                </li>
-                <li>
-                  Must have been enrolled full-time and completed the prior
-                  semester at GSU.
-                </li>
-                <li>
-                  Must be in good standing with no disciplinary sanctions within
-                  the past two years.
-                </li>
-                <li>Must be cleared by SEAL.</li>
-                <li>
-                  Chapter officers must be financially active at chapter,
-                  regional, and national levels.
-                </li>
-                <li>Must be an active member of the Pan-Hellenic Council.</li>
-                <li>
-                  Must have three designated delegates to attend PHC Council
-                  meetings.
-                </li>
-                <li>
-                  NPHC monthly meetings are separate from general organization
-                  monthly meetings.
-                </li>
-                <li>
-                  Intake occurs twice a year (October for fall, February for
-                  spring); chapters must select one cycle, not both.
-                </li>
-                <li>
-                  Must be in good standing with the chapter's national office.
-                </li>
-                <li>
-                  Members from other chapters or universities are not recognized
-                  and must be excluded from GSU chapter activity.
-                </li>
-                <li>
-                  Students may not be initiated into or join Greek organizations
-                  at another university.
-                </li>
-                <li>All intake activities must be held on the GSU campus.</li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- Clubs & Orgs Requirements -->
-          <div class="toggle-panel" id="req-clubs">
-            <div class="requirements-card">
-              <h3>Clubs &amp; Organizations Requirements</h3>
-              <ul class="req-list">
-                <li>Must register with SEAL every fall and spring semester.</li>
-                <li>Must maintain at least 10 members including officers.</li>
-                <li>
-                  All members must be enrolled full-time (12 credit hours).
-                </li>
-                <li>
-                  Must have an advisor who is a full-time GSU faculty or staff
-                  member.
-                </li>
-                <li>Members must maintain a 2.0 cumulative GPA.</li>
-                <li>Officers must maintain a 2.5 cumulative GPA.</li>
-                <li>Must have a constitution and bylaws on file with SEAL.</li>
-                <li>
-                  Must have an agency account with the GSU finance office.
-                </li>
-                <li>
-                  Must attend SEAL orientation/registration each semester.
-                </li>
-                <li>
-                  Must attend monthly SEAL meetings (fines apply for missing
-                  meetings).
-                </li>
-                <li>
-                  Must complete two community service projects per semester plus
-                  SEAL-selected University service projects.
-                </li>
-                <li>Must participate in Club and Organization Day.</li>
-                <li>
-                  Must participate in Miss GSU Coronation with a queen and
-                  escort.
-                </li>
-                <li>
-                  Must submit meeting minutes and attendance within two days of
-                  each meeting.
-                </li>
-                <li>Must attend Leadership Seminars.</li>
-                <li>
-                  Must deposit all organization funds in a University account.
-                </li>
-                <li>
-                  Must submit the Annual Officer Registration transition form
-                  between April 15 and May 15.
-                </li>
-                <li>Must complete the Anti-hazing course on CANVAS.</li>
-                <li>
-                  All members must sign a statement of understanding regarding
-                  the hazing policy.
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- How to Start -->
-    <section class="section" id="how-to-start">
-      <div class="container">
-        <h2 class="section__heading">How to Start a New Organization</h2>
-        <p class="section__subtext">
-          Complete each step before chartering and official recognition.
-        </p>
-
-        <div class="steps">
-          <div class="step-card">
-            <div class="step-card__number">1</div>
-            <h3 class="step-card__title">
-              Inform SEAL and Build Founding Group
-            </h3>
-            <p class="step-card__desc">
-              Notify SEAL that you are proposing a new group. Gather at least 10
-              founding members who are full-time students and meet the minimum
-              2.0 GPA requirement.
-            </p>
-          </div>
-          <div class="step-card">
-            <div class="step-card__number">2</div>
-            <h3 class="step-card__title">Hold Three Pre-Charter Meetings</h3>
-            <p class="step-card__desc">
-              Reserve campus space and hold three meetings before chartering.
-              During this period, business is limited to drafting the
-              constitution and forming your organization structure.
-            </p>
-          </div>
-          <div class="step-card">
-            <div class="step-card__number">3</div>
-            <h3 class="step-card__title">Prepare Required Documents</h3>
-            <p class="step-card__desc">
-              Draft the constitution using SEAL's sample format. Designate a
-              president, treasurer, and other officers on the New Student
-              Organization Application (NSOA). Secure a full-time faculty/staff
-              advisor and advisor agreement form.
-            </p>
-          </div>
-          <div class="step-card">
-            <div class="step-card__number">4</div>
-            <h3 class="step-card__title">Submit for Review</h3>
-            <p class="step-card__desc">
-              Submit all documents to SEAL. Nationally affiliated groups must
-              include a letter authorizing campus colonization and a letter of
-              advisor support.
-            </p>
-          </div>
-          <div class="step-card">
-            <div class="step-card__number">5</div>
-            <h3 class="step-card__title">Finalize Recognition Requirements</h3>
-            <p class="step-card__desc">
-              Recognition is granted the following semester after approval. The
-              proposed organization must not duplicate an existing organization,
-              and all founding members must complete the Anti-hazing course on
-              CANVAS.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Registration Denial -->
-    <section class="section section--alt">
-      <div class="container">
-        <h2 class="section__heading">Registration Will Be Denied If</h2>
-        <ul class="req-list">
-          <li>The organization is not formed for an educational purpose.</li>
-          <li>Requirements are incomplete or contain false material.</li>
-          <li>There are fewer than 10 committed students.</li>
-          <li>
-            The organization duplicates a currently registered organization.
-          </li>
-          <li>The organization is under sanction.</li>
-          <li>
-            The group attempts to re-register under a new name while under
-            sanction.
-          </li>
-          <li>
-            The organization is under suspension from its off-campus affiliate.
-          </li>
-          <li>The organization has delinquent debts.</li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- Categories and Constitution -->
-    <section class="section" id="categories">
-      <div class="container">
-        <h2 class="section__heading">Organization Categories at GSU</h2>
-        <p class="section__subtext">
-          Organizations may be recognized under one or more of the following
-          categories.
-        </p>
-        <ul class="req-list">
-          <li>Honor</li>
-          <li>Political</li>
-          <li>Professional/Academic/Honorary</li>
-          <li>Religious</li>
-          <li>Service/Social/Special Interest</li>
-          <li>Health and Wellness</li>
-          <li>Media &amp; Publications</li>
-          <li>Sports Clubs</li>
-          <li>
-            University Established (SGA, Student Union Board, Band,
-            Cheerleaders, etc.)
-          </li>
-          <li>NPHC Greek organizations</li>
-        </ul>
-
-        <h2 class="section__heading" id="constitution">
-          Constitution Requirements
-        </h2>
-        <p class="section__subtext">
-          Every student organization constitution must include the following.
-        </p>
-        <ul class="req-list">
-          <li>Organization name</li>
-          <li>Purpose and goals</li>
-          <li>Membership eligibility and requirements</li>
-          <li>Officer disciplinary procedures (notice and perspective)</li>
-          <li>Member disciplinary procedures (notice and perspective)</li>
-          <li>Officer selection process (timing and process)</li>
-          <li>Officer duties for every position</li>
-          <li>GPA and student status requirements</li>
-          <li>
-            Financial statement: "All monies belonging to this organization
-            shall be deposited and disbursed through a bank account established
-            for this organization in the Office of the Comptroller at GSU."
-          </li>
-          <li>Procedure to amend the constitution</li>
-          <li>
-            Dissolution clause (remaining funds/equipment transfer to SEAL)
-          </li>
-        </ul>
       </div>
     </section>
 

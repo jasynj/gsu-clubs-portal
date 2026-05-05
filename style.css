@@ -127,7 +127,15 @@
   .header__link:hover::after {
     width: 100%;
   }
-  
+
+  .header__link--active {
+    color: var(--color-gold);
+  }
+
+  .header__link--active::after {
+    width: 100%;
+  }
+
   .header__menu-btn {
     display: none;
     flex-direction: column;
@@ -186,7 +194,80 @@
     font-weight: 400;
     letter-spacing: 0.5px;
   }
-  
+
+  /* ===== HEADER BACK BUTTON ===== */
+  .header__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--color-white);
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-right: 16px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: color var(--transition), background var(--transition);
+  }
+
+  .header__back:hover {
+    color: var(--color-gold);
+    background: rgba(255,255,255,0.06);
+  }
+
+  .header__back-arrow {
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  @media (max-width: 480px) {
+    .header__back {
+      font-size: 0.78rem;
+      padding: 4px 8px;
+      margin-right: 8px;
+    }
+  }
+
+  /* ===== PAGE HERO (sub-pages) ===== */
+  .page-hero {
+    position: relative;
+    min-height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-black);
+    margin-top: 64px;
+    overflow: hidden;
+  }
+
+  .page-hero__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.6) 50%, rgba(253,185,19,0.2) 100%);
+  }
+
+  .page-hero__content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 32px 20px;
+  }
+
+  .page-hero__title {
+    font-family: var(--font-heading);
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--color-white);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+
+  .page-hero__subtitle {
+    font-size: 1rem;
+    color: var(--color-gold);
+    font-weight: 400;
+    letter-spacing: 0.5px;
+  }
+
   /* ===== SECTIONS ===== */
   .section {
     padding: 80px 0;
@@ -410,6 +491,113 @@
     font-size: 0.88rem;
     color: var(--color-gray-text);
     line-height: 1.6;
+  }
+
+  /* ===== PORTAL TILES (homepage directory) ===== */
+  .portal-tiles {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 32px;
+    max-width: 960px;
+    margin: 24px auto 0;
+  }
+
+  .portal-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 14px;
+    padding: 16px 8px;
+    border-radius: var(--card-radius);
+    transition: transform var(--transition);
+  }
+
+  .portal-tile:hover {
+    transform: translateY(-4px);
+  }
+
+  .portal-tile__circle {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #111 0%, #2a2a2a 100%);
+    color: var(--color-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.10);
+    transition: box-shadow var(--transition), background var(--transition);
+  }
+
+  .portal-tile:hover .portal-tile__circle {
+    box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+    background: linear-gradient(135deg, #000 0%, #333 100%);
+  }
+
+  .portal-tile__icon {
+    width: 72px;
+    height: 72px;
+  }
+
+  .portal-tile__label {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--color-black);
+  }
+
+  .portal-tile__sublabel {
+    font-size: 0.85rem;
+    color: var(--color-gray-text);
+    line-height: 1.4;
+    max-width: 220px;
+  }
+
+  /* ===== REGISTER CTA (start-org page) ===== */
+  .register-cta {
+    padding: 48px 0;
+  }
+
+  .register-cta__inner {
+    text-align: center;
+  }
+
+  .register-cta__title {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-black);
+    margin-bottom: 8px;
+  }
+
+  .register-cta__desc {
+    color: var(--color-gray-text);
+    margin-bottom: 24px;
+    font-size: 1rem;
+  }
+
+  .register-cta__btn {
+    display: inline-block;
+    background: var(--color-black);
+    color: var(--color-gold);
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 14px 36px;
+    border-radius: 50px;
+    transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+  }
+
+  .register-cta__btn:hover {
+    background: var(--color-gold);
+    color: var(--color-black);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
   }
 
   /* ===== ORGANIZATIONS DIRECTORY ===== */
@@ -862,14 +1050,52 @@
     .steps {
       flex-wrap: wrap;
     }
-  
+
     .step-card {
       flex: 1 1 calc(50% - 12px);
       min-width: 200px;
     }
+
+    .portal-tiles {
+      gap: 24px;
+    }
+
+    .portal-tile__circle {
+      width: 170px;
+      height: 170px;
+    }
+
+    .portal-tile__icon {
+      width: 60px;
+      height: 60px;
+    }
   }
   
   @media (max-width: 768px) {
+    .portal-tiles {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      max-width: 520px;
+      gap: 20px;
+    }
+
+    .portal-tile__circle {
+      width: 150px;
+      height: 150px;
+    }
+
+    .portal-tile__icon {
+      width: 52px;
+      height: 52px;
+    }
+
+    .page-hero {
+      min-height: 180px;
+    }
+
+    .page-hero__title {
+      font-size: 1.7rem;
+    }
+
     .header__nav {
       display: none;
       position: absolute;
@@ -951,6 +1177,25 @@
     .organizations-toggle .toggle-bar__btn {
       padding: 8px 14px;
       font-size: 0.8rem;
+    }
+
+    .portal-tiles {
+      grid-template-columns: 1fr;
+      max-width: 280px;
+    }
+
+    .portal-tile__circle {
+      width: 160px;
+      height: 160px;
+    }
+
+    .page-hero__title {
+      font-size: 1.4rem;
+    }
+
+    .register-cta__btn {
+      padding: 12px 28px;
+      font-size: 0.85rem;
     }
   }
   

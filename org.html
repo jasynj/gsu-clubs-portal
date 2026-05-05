@@ -13,20 +13,30 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <header class="header">
+    <header class="header" id="header">
       <div class="header__inner">
+        <a href="index.html" class="header__back">
+          <span class="header__back-arrow" aria-hidden="true">&larr;</span>
+          <span>Back</span>
+        </a>
         <a href="index.html" class="header__logo">
           <span class="header__logo-text">GRAMBLING STATE</span>
           <span class="header__logo-sub">Clubs & Organizations</span>
         </a>
+        <button class="header__menu-btn" id="menuBtn" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+        <nav class="header__nav" id="mainNav">
+          <a href="about-seal.html" class="header__link">About SEAL</a>
+          <a href="requirements.html" class="header__link">Status Requirements</a>
+          <a href="start-org.html" class="header__link">Start an Organization</a>
+        </nav>
       </div>
     </header>
 
     <main class="org-page">
       <section class="section">
         <div class="container">
-          <a class="org-page__back" href="index.html#organizations">← Back to all organizations</a>
-
           <div class="org-page__hero">
             <div class="org-card__logo org-page__logo">GSU</div>
             <div>
