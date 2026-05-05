@@ -3,6 +3,11 @@ const API_BASE = window.GSUAuth ? window.GSUAuth.API_BASE :
     ? "http://localhost:3001"
     : "https://gsu-clubs-portal-h8da.vercel.app");
 
+const DOC_TYPES = [
+  { key: "constitution", label: "Constitution" },
+  { key: "bylaws", label: "Bylaws" },
+];
+
 document.addEventListener("DOMContentLoaded", () => {
   const menuBtn = document.getElementById("menuBtn");
   const mainNav = document.getElementById("mainNav");
@@ -29,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let currentOrg = null;
   let isUnlocked = false;
-  let docsState = { constitution: [], bylaws: [] };
+  let docsState = Object.fromEntries(DOC_TYPES.map((t) => [t.key, []]));
 
   const getToken = () => window.GSUAuth?.getSession()?.token || null;
 
@@ -98,27 +103,38 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const renderDocuments = () => {
-    const constitutionCards = docsState.constitution
-      .map((doc) => makeDocumentCardMarkup(doc, "Constitution"))
-      .join("");
-    const bylawsCards = docsState.bylaws
-      .map((doc) => makeDocumentCardMarkup(doc, "Bylaws"))
-      .join("");
+    docSections.innerHTML = DOC_TYPES.map((type) => {
+      const docs = docsState[type.key] || [];
+      const count = docs.length;
+      const latestUpdated = docs.reduce(
+        (latest, d) => (!latest || new Date(d.updatedAt) > new Date(latest) ? d.updatedAt : latest),
+        null
+      );
 
-    docSections.innerHTML = `
-      <section class="doc-section">
-        <h2 class="doc-section__heading">Constitution</h2>
-        <div class="doc-section__list">
-          ${constitutionCards || '<p class="org-grid__status">No constitution documents yet.</p>'}
-        </div>
-      </section>
-      <section class="doc-section">
-        <h2 class="doc-section__heading">Bylaws</h2>
-        <div class="doc-section__list">
-          ${bylawsCards || '<p class="org-grid__status">No bylaws documents yet.</p>'}
-        </div>
-      </section>
-    `;
+      const cards = docs.map((doc) => makeDocumentCardMarkup(doc, type.label)).join("");
+
+      const emptyState = isUnlocked
+        ? `<p class="doc-block__empty">No ${type.label.toLowerCase()} on file yet. Add one using the editor below.</p>`
+        : `<p class="doc-block__empty">No ${type.label.toLowerCase()} on file yet.</p>`;
+
+      const meta = count > 0
+        ? `<span class="doc-block__meta">${count} document${count === 1 ? "" : "s"} · Last updated ${escapeHtml(formatDate(latestUpdated))}</span>`
+        : `<span class="doc-block__meta doc-block__meta--empty">No documents yet</span>`;
+
+      return `
+        <details class="doc-block">
+          <summary class="doc-block__summary">
+            <div class="doc-block__heading-row">
+              <h2 class="doc-block__heading">${type.label}</h2>
+              ${meta}
+            </div>
+          </summary>
+          <div class="doc-block__body">
+            ${cards || emptyState}
+          </div>
+        </details>
+      `;
+    }).join("");
   };
 
   const resetForm = () => {
@@ -160,10 +176,9 @@ document.addEventListener("DOMContentLoaded", () => {
       orgTitle.textContent = org.name;
       orgTypeLabel.textContent = org.type === "greek" ? "Greek Organization" : "Club / Organization";
 
-      docsState = {
-        constitution: org.documents.filter((d) => d.docType === "constitution"),
-        bylaws: org.documents.filter((d) => d.docType === "bylaws"),
-      };
+      docsState = Object.fromEntries(
+        DOC_TYPES.map((t) => [t.key, org.documents.filter((d) => d.docType === t.key)])
+      );
 
       if (isAdmin || isOrgOwner(org)) {
         unlockEditing();
@@ -288,8 +303,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    docsState.constitution = docsState.constitution.filter((d) => d.id !== docId);
-    docsState.bylaws = docsState.bylaws.filter((d) => d.id !== docId);
+    for (const key of Object.keys(docsState)) {
+      docsState[key] = docsState[key].filter((d) => d.id !== docId);
+    }
     renderDocuments();
   });
 

@@ -911,6 +911,104 @@
     gap: 12px;
   }
 
+  /* ===== DOC TYPE BLOCKS (collapsible) ===== */
+  .doc-block {
+    border: 1px solid var(--color-border);
+    border-radius: var(--card-radius);
+    background: var(--color-white);
+    margin-bottom: 16px;
+    overflow: hidden;
+    transition: box-shadow var(--transition);
+  }
+
+  .doc-block[open] {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  }
+
+  .doc-block__summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    user-select: none;
+    transition: background var(--transition);
+  }
+
+  .doc-block__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .doc-block__summary:hover {
+    background: var(--color-gray-light);
+  }
+
+  .doc-block__summary::after {
+    content: "+";
+    margin-left: auto;
+    color: var(--color-gold);
+    font-size: 1.6rem;
+    font-weight: 600;
+    line-height: 1;
+    transition: transform var(--transition);
+  }
+
+  .doc-block[open] .doc-block__summary::after {
+    content: "\2212";
+  }
+
+  .doc-block__heading-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+  }
+
+  .doc-block__heading {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    color: var(--color-black);
+    margin: 0;
+  }
+
+  .doc-block__meta {
+    font-size: 0.82rem;
+    color: var(--color-gray-text);
+  }
+
+  .doc-block__meta--empty {
+    color: #999;
+    font-style: italic;
+  }
+
+  .doc-block__body {
+    border-top: 1px solid var(--color-border);
+    padding: 16px 24px 20px;
+    display: grid;
+    gap: 12px;
+  }
+
+  .doc-block__empty {
+    color: var(--color-gray-text);
+    font-size: 0.92rem;
+    padding: 8px 0;
+  }
+
+  @media (max-width: 480px) {
+    .doc-block__summary {
+      padding: 16px;
+    }
+
+    .doc-block__heading {
+      font-size: 1.05rem;
+    }
+
+    .doc-block__body {
+      padding: 14px 16px 18px;
+    }
+  }
+
   .doc-card {
     border: 1px solid var(--color-border);
     border-radius: var(--card-radius);
