@@ -3,12 +3,10 @@ const prisma = require('../lib/prisma');
 const { requireAuth } = require('../middleware/auth');
 
 // Helper: check if the current user can write to a document's org.
-async function canWrite(user, orgId) {
+function canWrite(user, orgId) {
   if (user.role === 'super_admin') return true;
-  const mapping = await prisma.orgAdmin.findUnique({
-    where: { supabaseUserId_orgId: { supabaseUserId: user.id, orgId } },
-  });
-  return !!mapping;
+  if (user.role === 'org_admin' && user.orgId === orgId) return true;
+  return false;
 }
 
 // PATCH /api/documents/:id
@@ -17,7 +15,7 @@ router.patch('/:id', requireAuth, async (req, res, next) => {
     const doc = await prisma.document.findUnique({ where: { id: req.params.id } });
     if (!doc) return res.status(404).json({ error: 'Document not found' });
 
-    if (!(await canWrite(req.user, doc.orgId))) {
+    if (!canWrite(req.user, doc.orgId)) {
       return res.status(403).json({ error: 'Forbidden' });
     }
 
@@ -29,7 +27,7 @@ router.patch('/:id', requireAuth, async (req, res, next) => {
         ...(content !== undefined && { content }),
         ...(fileUrl !== undefined && { fileUrl }),
         version: { increment: 1 },
-        updatedById: req.user.id,
+        updatedById: req.user.slug || 'admin',
       },
     });
     res.json(updated);
@@ -44,7 +42,7 @@ router.delete('/:id', requireAuth, async (req, res, next) => {
     const doc = await prisma.document.findUnique({ where: { id: req.params.id } });
     if (!doc) return res.status(404).json({ error: 'Document not found' });
 
-    if (!(await canWrite(req.user, doc.orgId))) {
+    if (!canWrite(req.user, doc.orgId)) {
       return res.status(403).json({ error: 'Forbidden' });
     }
 

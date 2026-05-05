@@ -29,17 +29,19 @@ router.post('/org-login', async (req, res, next) => {
 });
 
 // POST /api/auth/admin-login
-// Body: { password }
+// Body: { username, password }
 router.post('/admin-login', async (req, res, next) => {
   try {
-    const { password } = req.body;
-    if (!password) return res.status(400).json({ error: 'password is required' });
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ error: 'username and password are required' });
+    }
 
-    if (password !== process.env.ADMIN_PASSWORD) {
+    if (username !== 'admin' || password !== process.env.ADMIN_PASSWORD) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const token = sign({ role: 'super_admin' });
+    const token = sign({ role: 'super_admin', username: 'admin' });
     res.json({ token });
   } catch (err) {
     next(err);

@@ -71,7 +71,7 @@ router.post('/:slug/documents', requireAuth, requireOrgAccess, async (req, res, 
         title,
         content,
         fileUrl: fileUrl || null,
-        updatedById: req.user.id,
+        updatedById: req.user.slug || 'admin',
       },
     });
     res.status(201).json(doc);

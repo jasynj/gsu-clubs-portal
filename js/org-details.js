@@ -1,6 +1,7 @@
-const API_BASE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === ""
-  ? "http://localhost:3001"
-  : "https://gsu-clubs-portal-h8da.vercel.app";
+const API_BASE = window.GSUAuth ? window.GSUAuth.API_BASE :
+  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === ""
+    ? "http://localhost:3001"
+    : "https://gsu-clubs-portal-h8da.vercel.app");
 
 document.addEventListener("DOMContentLoaded", () => {
   const menuBtn = document.getElementById("menuBtn");
@@ -21,18 +22,21 @@ document.addEventListener("DOMContentLoaded", () => {
   const docContentInput = document.getElementById("docContentInput");
   const docFileInput = document.getElementById("docFileInput");
   const docFormReset = document.getElementById("docFormReset");
-  const adminModal = document.getElementById("adminModal");
-  const adminPasswordForm = document.getElementById("adminPasswordForm");
-  const adminPasswordInput = document.getElementById("adminPasswordInput");
-  const adminError = document.getElementById("adminError");
+  const editActions = document.querySelector(".org-page__actions");
 
   const params = new URLSearchParams(window.location.search);
   const orgSlugParam = params.get("slug");
 
   let currentOrg = null;
-  let token = null;
   let isUnlocked = false;
   let docsState = { constitution: [], bylaws: [] };
+
+  const getToken = () => window.GSUAuth?.getSession()?.token || null;
+
+  const session = window.GSUAuth?.getSession() || null;
+  const isAdmin = session?.role === "super_admin";
+  const isOrgOwner = (org) =>
+    !!session && session.role === "org_admin" && session.orgSlug === org?.slug;
 
   const escapeHtml = (value = "") =>
     value
@@ -49,8 +53,9 @@ document.addEventListener("DOMContentLoaded", () => {
     return date.toLocaleString();
   };
 
-  const authFetch = (url, options = {}) =>
-    fetch(url, {
+  const authFetch = (url, options = {}) => {
+    const token = getToken();
+    return fetch(url, {
       ...options,
       headers: {
         "Content-Type": "application/json",
@@ -58,13 +63,14 @@ document.addEventListener("DOMContentLoaded", () => {
         ...(options.headers || {}),
       },
     });
+  };
 
   const makeDocumentCardMarkup = (doc, typeLabel) => {
     const safeTitle = escapeHtml(doc.title || "Untitled document");
     const safeContent = escapeHtml(doc.content || "");
     const fileMarkup = doc.fileUrl
       ? `<a class="doc-card__file-link" href="${escapeHtml(doc.fileUrl)}" target="_blank" rel="noopener">View attached file</a>`
-      : "https://gsu-clubs-portal-h8da.vercel.app";
+      : "";
 
     return `
       <details class="doc-card">
@@ -123,24 +129,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (docFileInput) docFileInput.value = "";
   };
 
-  const openModal = () => {
-    adminModal.hidden = false;
-    adminError.textContent = "";
-    adminPasswordInput.value = "";
-    adminPasswordInput.focus();
-  };
-
-  const closeModal = () => {
-    adminModal.hidden = true;
-    adminError.textContent = "";
-  };
-
   const unlockEditing = () => {
     isUnlocked = true;
-    docEditor.hidden = false;
-    openAdminModalBtn.textContent = "Editor Unlocked";
-    openAdminModalBtn.disabled = true;
+    if (docEditor) docEditor.hidden = false;
+    if (editActions) editActions.hidden = true;
     renderDocuments();
+  };
+
+  const hideEditUI = () => {
+    if (editActions) editActions.hidden = true;
+    if (docEditor) docEditor.hidden = true;
   };
 
   const bootstrapPage = async () => {
@@ -148,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
       orgTitle.textContent = "Organization not found";
       orgTypeLabel.textContent = "Missing organization parameter";
       docSections.innerHTML = '<p class="org-grid__status">Please return and select an organization.</p>';
-      openAdminModalBtn.disabled = true;
+      hideEditUI();
       return;
     }
 
@@ -167,56 +165,21 @@ document.addEventListener("DOMContentLoaded", () => {
         bylaws: org.documents.filter((d) => d.docType === "bylaws"),
       };
 
-      renderDocuments();
+      if (isAdmin || isOrgOwner(org)) {
+        unlockEditing();
+      } else {
+        hideEditUI();
+        renderDocuments();
+      }
     } catch {
       orgTitle.textContent = "Organization not available";
       orgTypeLabel.textContent = "Load error";
       docSections.innerHTML = '<p class="org-grid__status">Could not load organization data.</p>';
-      openAdminModalBtn.disabled = true;
+      hideEditUI();
     }
   };
 
-  openAdminModalBtn.addEventListener("click", openModal);
-
-  adminModal.addEventListener("click", (event) => {
-    if (event.target.closest("[data-close-modal='true']")) closeModal();
-  });
-
-  adminPasswordForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    if (!currentOrg) return;
-
-    const password = adminPasswordInput.value.trim();
-    adminError.textContent = "";
-
-    // Try org login first, then admin login
-    let res = await fetch(`${API_BASE}/api/auth/org-login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ slug: currentOrg.slug, password }),
-    });
-
-    if (res.status === 401) {
-      res = await fetch(`${API_BASE}/api/auth/admin-login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
-      });
-    }
-
-    if (!res.ok) {
-      adminError.textContent = "Incorrect password.";
-      adminPasswordInput.value = "";
-      return;
-    }
-
-    const data = await res.json();
-    token = data.token;
-    closeModal();
-    unlockEditing();
-  });
-
-  docFormReset.addEventListener("click", resetForm);
+  if (docFormReset) docFormReset.addEventListener("click", resetForm);
 
   const uploadFile = async (file) => {
     if (!file) return null;
@@ -242,56 +205,58 @@ document.addEventListener("DOMContentLoaded", () => {
     return fileUrl;
   };
 
-  docForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    if (!currentOrg || !isUnlocked) return;
+  if (docForm) {
+    docForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!currentOrg || !isUnlocked) return;
 
-    const docType = docTypeInput.value;
-    const docTitle = docTitleInput.value.trim();
-    const docContent = docContentInput.value.trim();
-    const docId = docIdInput.value.trim();
+      const docType = docTypeInput.value;
+      const docTitle = docTitleInput.value.trim();
+      const docContent = docContentInput.value.trim();
+      const docId = docIdInput.value.trim();
 
-    if (!docTitle || !docContent || !["constitution", "bylaws"].includes(docType)) return;
+      if (!docTitle || !docContent || !["constitution", "bylaws"].includes(docType)) return;
 
-    try {
-      const file = docFileInput?.files?.[0] || null;
-      const fileUrl = file ? await uploadFile(file) : undefined;
+      try {
+        const file = docFileInput?.files?.[0] || null;
+        const fileUrl = file ? await uploadFile(file) : undefined;
 
-      let res;
+        let res;
 
-      if (docId) {
-        res = await authFetch(`${API_BASE}/api/documents/${docId}`, {
-          method: "PATCH",
-          body: JSON.stringify({ title: docTitle, content: docContent, ...(fileUrl !== undefined && { fileUrl }) }),
-        });
-      } else {
-        res = await authFetch(`${API_BASE}/api/orgs/${currentOrg.slug}/documents`, {
-          method: "POST",
-          body: JSON.stringify({ docType, title: docTitle, content: docContent, fileUrl: fileUrl || null }),
-        });
+        if (docId) {
+          res = await authFetch(`${API_BASE}/api/documents/${docId}`, {
+            method: "PATCH",
+            body: JSON.stringify({ title: docTitle, content: docContent, ...(fileUrl !== undefined && { fileUrl }) }),
+          });
+        } else {
+          res = await authFetch(`${API_BASE}/api/orgs/${currentOrg.slug}/documents`, {
+            method: "POST",
+            body: JSON.stringify({ docType, title: docTitle, content: docContent, fileUrl: fileUrl || null }),
+          });
+        }
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || "Failed to save document");
+        }
+
+        const saved = await res.json();
+
+        if (docId) {
+          const list = docsState[saved.docType];
+          const idx = list.findIndex((d) => d.id === saved.id);
+          if (idx !== -1) list[idx] = saved;
+        } else {
+          docsState[saved.docType].unshift(saved);
+        }
+
+        renderDocuments();
+        resetForm();
+      } catch (error) {
+        window.alert(error.message);
       }
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Failed to save document");
-      }
-
-      const saved = await res.json();
-
-      if (docId) {
-        const list = docsState[saved.docType];
-        const idx = list.findIndex((d) => d.id === saved.id);
-        if (idx !== -1) list[idx] = saved;
-      } else {
-        docsState[saved.docType].unshift(saved);
-      }
-
-      renderDocuments();
-      resetForm();
-    } catch (error) {
-      window.alert(error.message);
-    }
-  });
+    });
+  }
 
   docSections.addEventListener("click", async (event) => {
     if (!isUnlocked) return;
