@@ -40,11 +40,33 @@ model Document {
 }
 
 enum OrgType {
-  greek
+  nphc
+  non_nphc
   club
 }
 
 enum DocType {
   constitution
   bylaws
+}
+
+model RegistrationRequest {
+  id                 String   @id @default(cuid())
+  orgName            String
+  orgType            OrgType
+  submittedCategory  String
+  foundingMembers    Json
+  meetingDates       Json
+  fileUrls           Json
+  status             RegStatus @default(pending)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@map("registration_requests")
+}
+
+enum RegStatus {
+  pending
+  approved
+  rejected
 }

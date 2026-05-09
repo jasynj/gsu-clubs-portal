@@ -41,4 +41,35 @@ router.post('/presign', requireAuth, async (req, res, next) => {
   }
 });
 
+// POST /api/uploads/presign-public
+// Unauthenticated presign for the new-org registration flow.
+// Files are pinned to the registrations/ prefix.
+router.post('/presign-public', async (req, res, next) => {
+  try {
+    const { contentType } = req.body;
+    if (!contentType) {
+      return res.status(400).json({ error: 'contentType is required' });
+    }
+    if (!ALLOWED_TYPES.includes(contentType)) {
+      return res.status(400).json({ error: 'Unsupported file type. Use PDF or DOCX.' });
+    }
+
+    const ext = contentType === 'application/pdf' ? 'pdf' : 'docx';
+    const key = `registrations/${crypto.randomUUID()}.${ext}`;
+
+    const command = new PutObjectCommand({
+      Bucket: BUCKET,
+      Key: key,
+      ContentType: contentType,
+    });
+
+    const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 300 });
+    const fileUrl = `${process.env.S3_PUBLIC_BASE_URL}/${key}`;
+
+    res.json({ uploadUrl, fileUrl, key });
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;

@@ -6,6 +6,7 @@ const authRouter = require('./routes/auth');
 const orgsRouter = require('./routes/orgs');
 const documentsRouter = require('./routes/documents');
 const uploadsRouter = require('./routes/uploads');
+const registrationsRouter = require('./routes/registrations');
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/orgs', orgsRouter);
 app.use('/api/documents', documentsRouter);
 app.use('/api/uploads', uploadsRouter);
+app.use('/api/registrations', registrationsRouter);
 
 // Global error handler
 app.use((err, req, res, next) => {
