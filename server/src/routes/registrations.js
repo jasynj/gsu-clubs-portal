@@ -34,7 +34,8 @@ router.post('/', async (req, res, next) => {
     if (!isStringArray(foundingMembers, MAX_MEMBERS) || foundingMembers.length === 0) {
       return res.status(400).json({ error: 'foundingMembers must be a non-empty array (max 50)' });
     }
-    if (!isStringArray(meetingDates, MAX_DATES)) {
+    const normalizedMeetingDates = meetingDates == null ? [] : meetingDates;
+    if (!isStringArray(normalizedMeetingDates, MAX_DATES)) {
       return res.status(400).json({ error: 'meetingDates must be an array (max 20)' });
     }
     if (!isStringArray(fileUrls || [], MAX_FILES)) {
@@ -47,7 +48,7 @@ router.post('/', async (req, res, next) => {
         orgType,
         submittedCategory: submittedCategory.trim(),
         foundingMembers,
-        meetingDates,
+        meetingDates: normalizedMeetingDates,
         fileUrls: fileUrls || [],
       },
       select: { id: true, status: true, createdAt: true },
