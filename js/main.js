@@ -101,10 +101,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const loadOrganizations = async () => {
     const allContainer = document.querySelector('[data-org-grid="all"]');
-    const greekContainer = document.querySelector('[data-org-grid="greek"]');
+    const nphcContainer = document.querySelector('[data-org-grid="nphc"]');
+    const nonNphcContainer = document.querySelector('[data-org-grid="non_nphc"]');
     const clubContainer = document.querySelector('[data-org-grid="club"]');
 
-    if (!allContainer || !greekContainer || !clubContainer) return;
+    if (!allContainer || !nphcContainer || !nonNphcContainer || !clubContainer) return;
 
     try {
       const response = await fetch(`${API_BASE}/api/orgs`);
@@ -113,12 +114,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const orgs = await response.json();
 
       renderOrgCards(allContainer, orgs);
-      renderOrgCards(greekContainer, orgs.filter((org) => org.type === "greek"));
+      renderOrgCards(nphcContainer, orgs.filter((org) => org.type === "nphc"));
+      renderOrgCards(nonNphcContainer, orgs.filter((org) => org.type === "non_nphc"));
       renderOrgCards(clubContainer, orgs.filter((org) => org.type === "club"));
     } catch (error) {
       const fallback = '<p class="org-grid__status">Could not load organization list.</p>';
       allContainer.innerHTML = fallback;
-      greekContainer.innerHTML = fallback;
+      nphcContainer.innerHTML = fallback;
+      nonNphcContainer.innerHTML = fallback;
       clubContainer.innerHTML = fallback;
     }
   };

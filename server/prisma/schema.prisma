@@ -8,14 +8,14 @@ datasource db {
 }
 
 model Organization {
-  id           String     @id @default(cuid())
-  name         String     @unique
+  id           String   @id @default(cuid())
+  name         String   @unique
   type         OrgType
-  slug         String     @unique
+  slug         String   @unique
   logoUrl      String?
   passwordHash String
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   documents Document[]
 
@@ -30,7 +30,7 @@ model Document {
   content     String   @db.Text
   fileUrl     String?
   version     Int      @default(1)
-  updatedById String?  // slug of org or "admin"
+  updatedById String? // slug of org or "admin"
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -48,19 +48,20 @@ enum OrgType {
 enum DocType {
   constitution
   bylaws
+  details
 }
 
 model RegistrationRequest {
-  id                 String   @id @default(cuid())
-  orgName            String
-  orgType            OrgType
-  submittedCategory  String
-  foundingMembers    Json
-  meetingDates       Json
-  fileUrls           Json
-  status             RegStatus @default(pending)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id                String    @id @default(cuid())
+  orgName           String
+  orgType           OrgType
+  submittedCategory String
+  foundingMembers   Json
+  meetingDates      Json
+  fileUrls          Json
+  status            RegStatus @default(pending)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   @@map("registration_requests")
 }

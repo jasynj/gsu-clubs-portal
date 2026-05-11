@@ -55,7 +55,7 @@
           <section class="doc-editor" id="docEditor" hidden>
             <h2 class="doc-editor__title">Admin Editor</h2>
             <p class="doc-editor__hint">
-              Add new constitution/bylaw entries or update an existing one.
+              Edit the public details profile, or add/update constitution and bylaws.
             </p>
             <form id="docForm" class="doc-editor__form">
               <input type="hidden" id="docId" />
@@ -63,18 +63,19 @@
               <label class="doc-editor__field">
                 <span>Document Type</span>
                 <select id="docType" required>
+                  <option value="details">Details (public profile)</option>
                   <option value="constitution">Constitution</option>
                   <option value="bylaws">Bylaws</option>
                 </select>
               </label>
 
               <label class="doc-editor__field">
-                <span>Title</span>
+                <span id="docTitleLabel">Title</span>
                 <input id="docTitleInput" type="text" required maxlength="160" />
               </label>
 
               <label class="doc-editor__field">
-                <span>Document Content</span>
+                <span id="docContentLabel">Document Content</span>
                 <textarea
                   id="docContentInput"
                   rows="7"
@@ -84,7 +85,7 @@
               </label>
 
               <label class="doc-editor__field">
-                <span>Optional File Upload (PDF, DOCX, etc.)</span>
+                <span id="docFileLabel">Optional File Upload (PDF, DOCX, etc.)</span>
                 <input id="docFileInput" type="file" />
               </label>
 

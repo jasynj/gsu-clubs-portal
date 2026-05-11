@@ -4,9 +4,13 @@ const API_BASE = window.GSUAuth ? window.GSUAuth.API_BASE :
     : "https://gsu-clubs-portal-h8da.vercel.app");
 
 const DOC_TYPES = [
-  { key: "constitution", label: "Constitution" },
-  { key: "bylaws", label: "Bylaws" },
+  { key: "details",      label: "About",        visibility: "public",  uploadKind: "image" },
+  { key: "constitution", label: "Constitution", visibility: "private", uploadKind: "file"  },
+  { key: "bylaws",       label: "Bylaws",       visibility: "private", uploadKind: "file"  },
 ];
+
+const IMAGE_ACCEPT = "image/png,image/jpeg,image/webp";
+const FILE_ACCEPT = "application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
 document.addEventListener("DOMContentLoaded", () => {
   const menuBtn = document.getElementById("menuBtn");
@@ -26,6 +30,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const docTitleInput = document.getElementById("docTitleInput");
   const docContentInput = document.getElementById("docContentInput");
   const docFileInput = document.getElementById("docFileInput");
+  const docTitleLabel = document.getElementById("docTitleLabel");
+  const docContentLabel = document.getElementById("docContentLabel");
+  const docFileLabel = document.getElementById("docFileLabel");
   const docFormReset = document.getElementById("docFormReset");
   const editActions = document.querySelector(".org-page__actions");
 
@@ -70,6 +77,51 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
+  const getDetailsDoc = () => (docsState.details && docsState.details[0]) || null;
+
+  const renderDetailsCard = () => {
+    const detailsDoc = getDetailsDoc();
+
+    if (!detailsDoc) {
+      if (!isUnlocked) {
+        return `
+          <section class="org-details-card org-details-card--empty">
+            <p class="org-details-card__placeholder">This organization hasn't published a profile yet.</p>
+          </section>
+        `;
+      }
+      return `
+        <section class="org-details-card org-details-card--empty">
+          <p class="org-details-card__placeholder">No public profile yet. Use the editor below — pick "Details" as the type — to create one.</p>
+        </section>
+      `;
+    }
+
+    const safeTitle = escapeHtml(detailsDoc.title || "");
+    const safeContent = escapeHtml(detailsDoc.content || "").replaceAll("\n", "<br/>");
+    const imageMarkup = detailsDoc.fileUrl
+      ? `<img class="org-details-card__image" src="${escapeHtml(detailsDoc.fileUrl)}" alt="${safeTitle}" />`
+      : `<div class="org-details-card__image org-details-card__image--placeholder" aria-hidden="true"></div>`;
+
+    const adminControls = isUnlocked
+      ? `<div class="org-details-card__actions">
+           <button type="button" class="doc-card__admin-btn" data-edit-doc-id="${detailsDoc.id}" data-edit-doc-type="details">Edit details</button>
+           <button type="button" class="doc-card__admin-btn doc-card__admin-btn--danger" data-delete-doc-id="${detailsDoc.id}">Delete</button>
+         </div>`
+      : "";
+
+    return `
+      <section class="org-details-card">
+        ${imageMarkup}
+        <div class="org-details-card__body">
+          <h2 class="org-details-card__title">${safeTitle}</h2>
+          <p class="org-details-card__text">${safeContent}</p>
+          ${adminControls}
+        </div>
+      </section>
+    `;
+  };
+
   const makeDocumentCardMarkup = (doc, typeLabel) => {
     const safeTitle = escapeHtml(doc.title || "Untitled document");
     const safeContent = escapeHtml(doc.content || "");
@@ -102,47 +154,67 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
   };
 
-  const renderDocuments = () => {
-    docSections.innerHTML = DOC_TYPES.map((type) => {
-      const docs = docsState[type.key] || [];
-      const count = docs.length;
-      const latestUpdated = docs.reduce(
-        (latest, d) => (!latest || new Date(d.updatedAt) > new Date(latest) ? d.updatedAt : latest),
-        null
-      );
+  const renderPrivateBlock = (type) => {
+    const docs = docsState[type.key] || [];
+    const count = docs.length;
+    const latestUpdated = docs.reduce(
+      (latest, d) => (!latest || new Date(d.updatedAt) > new Date(latest) ? d.updatedAt : latest),
+      null
+    );
 
-      const cards = docs.map((doc) => makeDocumentCardMarkup(doc, type.label)).join("");
+    const cards = docs.map((doc) => makeDocumentCardMarkup(doc, type.label)).join("");
+    const emptyState = `<p class="doc-block__empty">No ${type.label.toLowerCase()} on file yet. Add one using the editor below.</p>`;
+    const meta = count > 0
+      ? `<span class="doc-block__meta">${count} document${count === 1 ? "" : "s"} · Last updated ${escapeHtml(formatDate(latestUpdated))}</span>`
+      : `<span class="doc-block__meta doc-block__meta--empty">No documents yet</span>`;
 
-      const emptyState = isUnlocked
-        ? `<p class="doc-block__empty">No ${type.label.toLowerCase()} on file yet. Add one using the editor below.</p>`
-        : `<p class="doc-block__empty">No ${type.label.toLowerCase()} on file yet.</p>`;
-
-      const meta = count > 0
-        ? `<span class="doc-block__meta">${count} document${count === 1 ? "" : "s"} · Last updated ${escapeHtml(formatDate(latestUpdated))}</span>`
-        : `<span class="doc-block__meta doc-block__meta--empty">No documents yet</span>`;
-
-      return `
-        <details class="doc-block">
-          <summary class="doc-block__summary">
-            <div class="doc-block__heading-row">
-              <h2 class="doc-block__heading">${type.label}</h2>
-              ${meta}
-            </div>
-          </summary>
-          <div class="doc-block__body">
-            ${cards || emptyState}
+    return `
+      <details class="doc-block">
+        <summary class="doc-block__summary">
+          <div class="doc-block__heading-row">
+            <h2 class="doc-block__heading">${type.label}</h2>
+            ${meta}
           </div>
-        </details>
-      `;
-    }).join("");
+        </summary>
+        <div class="doc-block__body">
+          ${cards || emptyState}
+        </div>
+      </details>
+    `;
+  };
+
+  const renderDocuments = () => {
+    const detailsMarkup = renderDetailsCard();
+    const privateBlocks = isUnlocked
+      ? DOC_TYPES.filter((t) => t.visibility === "private").map(renderPrivateBlock).join("")
+      : "";
+    docSections.innerHTML = detailsMarkup + privateBlocks;
+  };
+
+  const applyTypeAwareFormUI = () => {
+    const selectedType = docTypeInput.value;
+    if (selectedType === "details") {
+      docTitleLabel.textContent = "Display name / heading";
+      docContentLabel.textContent = "Public summary";
+      docFileLabel.textContent = "Profile image (PNG, JPEG, or WEBP)";
+      docContentInput.placeholder = "Describe your organization for visitors...";
+      if (docFileInput) docFileInput.accept = IMAGE_ACCEPT;
+    } else {
+      docTitleLabel.textContent = "Title";
+      docContentLabel.textContent = "Document Content";
+      docFileLabel.textContent = "Optional File Upload (PDF or DOCX)";
+      docContentInput.placeholder = "Paste the constitution/bylaw text or summary...";
+      if (docFileInput) docFileInput.accept = FILE_ACCEPT;
+    }
   };
 
   const resetForm = () => {
     docIdInput.value = "";
-    docTypeInput.value = "constitution";
+    docTypeInput.value = "details";
     docTitleInput.value = "";
     docContentInput.value = "";
     if (docFileInput) docFileInput.value = "";
+    applyTypeAwareFormUI();
   };
 
   const unlockEditing = () => {
@@ -167,14 +239,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      const response = await fetch(`${API_BASE}/api/orgs/${orgSlugParam}`);
+      const token = getToken();
+      const response = await fetch(`${API_BASE}/api/orgs/${orgSlugParam}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       if (!response.ok) throw new Error("Not found");
 
       const org = await response.json();
       currentOrg = org;
 
+      const TYPE_LABELS = {
+        nphc: "NPHC Organization",
+        non_nphc: "Non-NPHC Organization",
+        club: "Club / Organization",
+      };
       orgTitle.textContent = org.name;
-      orgTypeLabel.textContent = org.type === "greek" ? "Greek Organization" : "Club / Organization";
+      orgTypeLabel.textContent = TYPE_LABELS[org.type] || "Organization";
 
       docsState = Object.fromEntries(
         DOC_TYPES.map((t) => [t.key, org.documents.filter((d) => d.docType === t.key)])
@@ -195,11 +275,19 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   if (docFormReset) docFormReset.addEventListener("click", resetForm);
+  if (docTypeInput) docTypeInput.addEventListener("change", applyTypeAwareFormUI);
+  applyTypeAwareFormUI();
 
-  const uploadFile = async (file) => {
+  const uploadFile = async (file, kind) => {
     if (!file) return null;
-    const ALLOWED = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
-    if (!ALLOWED.includes(file.type)) throw new Error("Only PDF or Word documents are allowed.");
+    const allowed = kind === "image"
+      ? ["image/png", "image/jpeg", "image/webp"]
+      : ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+    if (!allowed.includes(file.type)) {
+      throw new Error(kind === "image"
+        ? "Only PNG, JPEG, or WEBP images are allowed."
+        : "Only PDF or Word documents are allowed.");
+    }
     if (file.size > 10 * 1024 * 1024) throw new Error("File must be under 10MB.");
 
     const presignRes = await authFetch(`${API_BASE}/api/uploads/presign`, {
@@ -228,13 +316,20 @@ document.addEventListener("DOMContentLoaded", () => {
       const docType = docTypeInput.value;
       const docTitle = docTitleInput.value.trim();
       const docContent = docContentInput.value.trim();
-      const docId = docIdInput.value.trim();
+      let docId = docIdInput.value.trim();
 
-      if (!docTitle || !docContent || !["constitution", "bylaws"].includes(docType)) return;
+      if (!docTitle || !docContent || !["constitution", "bylaws", "details"].includes(docType)) return;
+
+      // Singleton enforcement for details: if creating a new one but one already exists, PATCH it instead.
+      if (!docId && docType === "details") {
+        const existing = getDetailsDoc();
+        if (existing) docId = existing.id;
+      }
 
       try {
         const file = docFileInput?.files?.[0] || null;
-        const fileUrl = file ? await uploadFile(file) : undefined;
+        const uploadKind = docType === "details" ? "image" : "file";
+        const fileUrl = file ? await uploadFile(file, uploadKind) : undefined;
 
         let res;
 
@@ -261,6 +356,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const list = docsState[saved.docType];
           const idx = list.findIndex((d) => d.id === saved.id);
           if (idx !== -1) list[idx] = saved;
+          else list.unshift(saved);
         } else {
           docsState[saved.docType].unshift(saved);
         }
@@ -287,6 +383,7 @@ document.addEventListener("DOMContentLoaded", () => {
       docTypeInput.value = docType;
       docTitleInput.value = targetDoc.title;
       docContentInput.value = targetDoc.content;
+      applyTypeAwareFormUI();
       window.scrollTo({ top: docEditor.offsetTop - 90, behavior: "smooth" });
       return;
     }

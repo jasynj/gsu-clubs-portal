@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const prisma = require('../lib/prisma');
 const { requireAuth } = require('../middleware/auth');
+const { optionalAuth } = require('../middleware/optionalAuth');
 const { requireOrgAccess } = require('../middleware/requireRole');
 
 // GET /api/orgs?type=greek|club
@@ -20,7 +21,7 @@ router.get('/', async (req, res, next) => {
 });
 
 // GET /api/orgs/:slug
-router.get('/:slug', async (req, res, next) => {
+router.get('/:slug', optionalAuth, async (req, res, next) => {
   try {
     const org = await prisma.organization.findUnique({
       where: { slug: req.params.slug },
@@ -46,6 +47,13 @@ router.get('/:slug', async (req, res, next) => {
       },
     });
     if (!org) return res.status(404).json({ error: 'Organization not found' });
+
+    const isSuperAdmin = req.user?.role === 'super_admin';
+    const isOrgOwner = req.user?.role === 'org_admin' && req.user?.orgId === org.id;
+    if (!isSuperAdmin && !isOrgOwner) {
+      org.documents = org.documents.filter((d) => d.docType === 'details');
+    }
+
     res.json(org);
   } catch (err) {
     next(err);
@@ -59,8 +67,8 @@ router.post('/:slug/documents', requireAuth, requireOrgAccess, async (req, res, 
     if (!docType || !title || !content) {
       return res.status(400).json({ error: 'docType, title, and content are required' });
     }
-    if (!['constitution', 'bylaws'].includes(docType)) {
-      return res.status(400).json({ error: 'docType must be constitution or bylaws' });
+    if (!['constitution', 'bylaws', 'details'].includes(docType)) {
+      return res.status(400).json({ error: 'docType must be constitution, bylaws, or details' });
     }
 
     const org = req.org || await prisma.organization.findUnique({ where: { slug: req.params.slug } });
