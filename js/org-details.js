@@ -103,9 +103,10 @@ document.addEventListener("DOMContentLoaded", () => {
       ? `<img class="org-details-card__image" src="${escapeHtml(detailsDoc.fileUrl)}" alt="${safeTitle}" />`
       : `<div class="org-details-card__image org-details-card__image--placeholder" aria-hidden="true"></div>`;
 
+    const canEdit = isOrgOwner(currentOrg);
     const adminControls = isUnlocked
       ? `<div class="org-details-card__actions">
-           <button type="button" class="doc-card__admin-btn" data-edit-doc-id="${detailsDoc.id}" data-edit-doc-type="details">Edit details</button>
+           ${canEdit ? `<button type="button" class="doc-card__admin-btn" data-edit-doc-id="${detailsDoc.id}" data-edit-doc-type="details">Edit details</button>` : ""}
            <button type="button" class="doc-card__admin-btn doc-card__admin-btn--danger" data-delete-doc-id="${detailsDoc.id}">Delete</button>
          </div>`
       : "";
@@ -122,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
   };
 
-  const makeDocumentCardMarkup = (doc, typeLabel) => {
+  const makeDocumentCardMarkup = (doc, typeLabel, canEdit) => {
     const safeTitle = escapeHtml(doc.title || "Untitled document");
     const safeContent = escapeHtml(doc.content || "");
     const fileMarkup = doc.fileUrl
@@ -144,7 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
           ${
             isUnlocked
               ? `<div class="doc-card__admin-actions">
-                  <button type="button" class="doc-card__admin-btn" data-edit-doc-id="${doc.id}" data-edit-doc-type="${doc.docType}">Edit</button>
+                  ${canEdit ? `<button type="button" class="doc-card__admin-btn" data-edit-doc-id="${doc.id}" data-edit-doc-type="${doc.docType}">Edit</button>` : ""}
                   <button type="button" class="doc-card__admin-btn doc-card__admin-btn--danger" data-delete-doc-id="${doc.id}">Delete</button>
                 </div>`
               : ""
@@ -162,7 +163,8 @@ document.addEventListener("DOMContentLoaded", () => {
       null
     );
 
-    const cards = docs.map((doc) => makeDocumentCardMarkup(doc, type.label)).join("");
+    const canEdit = isOrgOwner(currentOrg);
+    const cards = docs.map((doc) => makeDocumentCardMarkup(doc, type.label, canEdit)).join("");
     const emptyState = `<p class="doc-block__empty">No ${type.label.toLowerCase()} on file yet. Add one using the editor below.</p>`;
     const meta = count > 0
       ? `<span class="doc-block__meta">${count} document${count === 1 ? "" : "s"} · Last updated ${escapeHtml(formatDate(latestUpdated))}</span>`
@@ -224,6 +226,13 @@ document.addEventListener("DOMContentLoaded", () => {
     renderDocuments();
   };
 
+  const unlockViewOnly = () => {
+    isUnlocked = true;
+    if (docEditor) docEditor.hidden = true;
+    if (editActions) editActions.hidden = true;
+    renderDocuments();
+  };
+
   const hideEditUI = () => {
     if (editActions) editActions.hidden = true;
     if (docEditor) docEditor.hidden = true;
@@ -260,8 +269,10 @@ document.addEventListener("DOMContentLoaded", () => {
         DOC_TYPES.map((t) => [t.key, org.documents.filter((d) => d.docType === t.key)])
       );
 
-      if (isAdmin || isOrgOwner(org)) {
+      if (isOrgOwner(org)) {
         unlockEditing();
+      } else if (isAdmin) {
+        unlockViewOnly();
       } else {
         hideEditUI();
         renderDocuments();
