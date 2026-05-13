@@ -1,7 +1,7 @@
 const API_BASE = window.GSUAuth ? window.GSUAuth.API_BASE :
   (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === ""
     ? "http://localhost:3001"
-    : "https://gsu-clubs-portal-h8da.vercel.app");
+    : "https://gsu-clubs-portal-50tdlfgdb-jasynjs-projects.vercel.app");
 
 const DOC_TYPES = [
   { key: "details",      label: "About",        visibility: "public",  uploadKind: "image" },

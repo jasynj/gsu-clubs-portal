@@ -9,7 +9,7 @@
     window.location.hostname === "127.0.0.1" ||
     window.location.hostname === ""
       ? "http://localhost:3001"
-      : "https://gsu-clubs-portal-h8da.vercel.app";
+      : "https://gsu-clubs-portal-50tdlfgdb-jasynjs-projects.vercel.app";
 
   function slugify(name) {
     return String(name || "")
